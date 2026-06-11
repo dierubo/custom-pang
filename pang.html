@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PANG! · 10 Niveles</title>
+<style>
+  :root{
+    --ink:#16121f;
+    --panel:#241c33;
+    --coral:#ff5e5b;
+    --gold:#ffd166;
+    --aqua:#4ecdc4;
+    --p1:#5bc0ff;
+    --p2:#7dde6a;
+    --paper:#fdf6e3;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:radial-gradient(circle at 50% 20%, #2c2240 0%, var(--ink) 70%);
+    font-family:"Courier New", ui-monospace, monospace;
+    color:var(--paper);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    overflow:hidden;
+  }
+  #wrap{
+    position:relative;
+    width:min(96vw, calc(96vh * 16 / 9));
+    aspect-ratio:16/9;
+    border:4px solid var(--gold);
+    border-radius:10px;
+    box-shadow:0 0 0 4px var(--ink), 0 18px 60px rgba(0,0,0,.6);
+    overflow:hidden;
+    background:#000;
+  }
+  canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+
+  .overlay{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:18px;text-align:center;
+    background:rgba(15,10,25,.88);
+    backdrop-filter:blur(3px);
+    padding:24px;
+    z-index:5;
+  }
+  .hidden{display:none !important}
+
+  .title{
+    font-size:clamp(48px, 9vw, 110px);
+    font-weight:900;
+    letter-spacing:.08em;
+    color:var(--coral);
+    text-shadow:
+      4px 4px 0 var(--gold),
+      8px 8px 0 rgba(0,0,0,.45);
+    animation:bounceTitle 1.6s ease-in-out infinite;
+  }
+  @keyframes bounceTitle{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-12px)}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .title{animation:none}
+  }
+  .subtitle{
+    font-size:clamp(12px,1.6vw,18px);
+    letter-spacing:.35em;
+    color:var(--aqua);
+    text-transform:uppercase;
+  }
+  .btn{
+    font-family:inherit;
+    font-size:clamp(16px,2vw,24px);
+    font-weight:900;
+    letter-spacing:.1em;
+    padding:14px 38px;
+    border:3px solid var(--gold);
+    border-radius:8px;
+    background:var(--panel);
+    color:var(--paper);
+    cursor:pointer;
+    box-shadow:0 5px 0 #0e0a18;
+    transition:transform .08s, box-shadow .08s, background .15s;
+  }
+  .btn:hover{background:#332a48}
+  .btn:active{transform:translateY(4px);box-shadow:0 1px 0 #0e0a18}
+  .btn:focus-visible{outline:3px dashed var(--aqua);outline-offset:4px}
+  .btn.alt{border-color:var(--aqua)}
+
+  .controls{
+    display:flex;gap:34px;flex-wrap:wrap;justify-content:center;
+    font-size:clamp(11px,1.4vw,15px);
+    line-height:1.8;
+  }
+  .controls .card{
+    border:2px solid rgba(255,255,255,.18);
+    border-radius:8px;
+    padding:12px 20px;
+    background:rgba(255,255,255,.04);
+    min-width:200px;
+  }
+  .controls .card h3{letter-spacing:.2em;margin-bottom:6px;font-size:1.05em}
+  .p1c{color:var(--p1)} .p2c{color:var(--p2)}
+  kbd{
+    display:inline-block;
+    border:1px solid rgba(255,255,255,.4);
+    border-bottom-width:3px;
+    border-radius:4px;
+    padding:0 7px;
+    background:rgba(255,255,255,.08);
+    font-family:inherit;
+  }
+  .big{font-size:clamp(26px,4vw,52px);font-weight:900;letter-spacing:.12em}
+  .gold{color:var(--gold)}
+  .coral{color:var(--coral)}
+  .small{font-size:clamp(11px,1.3vw,14px);opacity:.75;letter-spacing:.15em}
+
+  /* ---------- Controles táctiles ---------- */
+  #touch{position:absolute;inset:0;pointer-events:none;z-index:4}
+  .tcluster{
+    position:absolute;bottom:10px;
+    display:flex;gap:10px;align-items:flex-end;
+    pointer-events:none;
+  }
+  .tbtn{
+    pointer-events:auto;
+    width:clamp(48px, 9vw, 70px);
+    height:clamp(48px, 9vw, 70px);
+    border-radius:50%;
+    border:3px solid rgba(255,255,255,.45);
+    background:rgba(20,15,35,.45);
+    color:#fff;
+    font-size:clamp(18px,3.4vw,28px);
+    font-weight:900;
+    display:flex;align-items:center;justify-content:center;
+    user-select:none;-webkit-user-select:none;
+    touch-action:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .tbtn.on{background:rgba(255,255,255,.35)}
+  .tbtn.p1b{border-color:var(--p1)}
+  .tbtn.p2b{border-color:var(--p2)}
+  .tbtn.fire{border-color:var(--coral);background:rgba(255,94,91,.25)}
+  .tbtn.fire.on{background:rgba(255,94,91,.6)}
+  #tPause{
+    position:absolute;top:8px;right:10px;
+    width:38px;height:38px;border-radius:8px;
+    font-size:16px;
+  }
+  #rotate{
+    display:none;
+    position:absolute;top:0;left:0;right:0;
+    z-index:6;
+    background:rgba(255,209,102,.92);
+    color:#16121f;
+    font-weight:900;
+    font-size:13px;
+    letter-spacing:.1em;
+    text-align:center;
+    padding:8px;
+  }
+  @media (orientation: portrait) and (pointer: coarse){
+    #rotate{display:block}
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game" width="960" height="540"></canvas>
+
+  <!-- MENÚ -->
+  <div id="menu" class="overlay">
+    <div class="title">PANG!</div>
+    <div class="subtitle">· La vuelta al mundo en 10 niveles ·</div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;justify-content:center">
+      <button class="btn" id="btn1p">1 JUGADOR</button>
+      <button class="btn alt" id="btn2p">2 JUGADORES</button>
+    </div>
+    <div class="controls">
+      <div class="card">
+        <h3 class="p1c">JUGADOR 1</h3>
+        Mover: <kbd>◀</kbd> <kbd>▶</kbd><br>
+        Disparar: <kbd>▲</kbd> o <kbd>Enter</kbd>
+      </div>
+      <div class="card">
+        <h3 class="p2c">JUGADOR 2</h3>
+        Mover: <kbd>A</kbd> <kbd>D</kbd><br>
+        Disparar: <kbd>W</kbd>
+      </div>
+    </div>
+    <div class="small">P = pausa · En móvil salen botones táctiles · Revienta todas las burbujas sin que te toquen</div>
+  </div>
+
+  <!-- INTERMEDIO / PAUSA / FIN -->
+  <div id="msg" class="overlay hidden">
+    <div class="big" id="msgTitle"></div>
+    <div id="msgBody" class="small" style="font-size:clamp(13px,1.6vw,18px)"></div>
+    <button class="btn" id="msgBtn">CONTINUAR</button>
+  </div>
+
+  <!-- CONTROLES TÁCTILES -->
+  <div id="touch" class="hidden">
+    <div class="tcluster" id="tLeft" style="left:12px"></div>
+    <div class="tcluster" id="tRight" style="right:12px"></div>
+    <div class="tbtn" id="tPause">⏸</div>
+  </div>
+
+  <div id="rotate">🔄 GIRA EL MÓVIL · SE JUEGA MEJOR EN HORIZONTAL</div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   PANG! — arcade de burbujas · 10 niveles · 1-2 jugadores
+   ============================================================ */
+const cv = document.getElementById("game");
+const cx = cv.getContext("2d");
+const W = cv.width, H = cv.height;
+const FLOOR = H - 34;            // suelo
+const G = 0.16;                  // gravedad px/frame²
+
+/* ---------- Niveles: ciudades, cielos y burbujas ----------
+   size: 0=mini 1=pequeña 2=mediana 3=grande
+------------------------------------------------------------ */
+const LEVELS = [
+ { city:"MONTE FUJI",    sky:["#2e3192","#f7779b","#ffd29d"], ground:"#3b2d4f", speed:1.00,
+   balls:[{s:2,x:.5,d:1}] },
+ { city:"SÍDNEY",        sky:["#0b4f8a","#3aa7c9","#ffe9a8"], ground:"#243b55", speed:1.00,
+   balls:[{s:2,x:.3,d:1},{s:1,x:.7,d:-1}] },
+ { city:"ATENAS",        sky:["#1b3a6b","#7fb2d9","#f9f1d8"], ground:"#46506b", speed:1.05,
+   balls:[{s:3,x:.5,d:1}] },
+ { city:"BARCELONA",     sky:["#5b2a86","#d94f70","#ffb86b"], ground:"#3a2440", speed:1.05,
+   balls:[{s:2,x:.25,d:1},{s:2,x:.75,d:-1}] },
+ { city:"PARÍS",         sky:["#1f1c3a","#5a4e8c","#e8a0bf"], ground:"#2b2640", speed:1.10,
+   balls:[{s:3,x:.35,d:1},{s:1,x:.8,d:-1}] },
+ { city:"LONDRES",       sky:["#27323f","#5d7585","#c9cdb8"], ground:"#1d242e", speed:1.10,
+   balls:[{s:2,x:.2,d:1},{s:2,x:.5,d:-1},{s:1,x:.85,d:1}] },
+ { city:"NUEVA YORK",    sky:["#0e1330","#27407a","#f4a259"], ground:"#141a33", speed:1.15,
+   balls:[{s:3,x:.3,d:1},{s:3,x:.7,d:-1}] },
+ { city:"EL CAIRO",      sky:["#7a2e2e","#d9763d","#ffd97d"], ground:"#4a2c20", speed:1.20,
+   balls:[{s:3,x:.5,d:1},{s:2,x:.15,d:1},{s:1,x:.85,d:-1}] },
+ { city:"KIOTO",         sky:["#26104a","#7b2d6e","#e76f51"], ground:"#1e0f33", speed:1.25,
+   balls:[{s:3,x:.25,d:1},{s:3,x:.75,d:-1},{s:1,x:.5,d:1}] },
+ { city:"ISLA DE PASCUA",sky:["#021c2e","#0f4c5c","#5fa8a0"], ground:"#06222f", speed:1.30,
+   balls:[{s:3,x:.2,d:1},{s:3,x:.5,d:-1},{s:3,x:.8,d:1},{s:0,x:.35,d:-1}] },
+];
+
+/* tamaño de burbuja: radio, altura de rebote, puntos, color */
+const SIZES = [
+ { r:12, bounce:140, pts:200, hue:200 },
+ { r:20, bounce:210, pts:150, hue:160 },
+ { r:32, bounce:290, pts:100, hue: 35 },
+ { r:47, bounce:370, pts: 50, hue:  0 },
+];
+
+/* ---------------------- Estado global ---------------------- */
+const Game = {
+  mode:1, level:0, state:"menu",  // menu | play | pause | between | over | win
+  players:[], balls:[], shots:[], pops:[], fruits:[], texts:[],
+  skyline:[], shake:0,
+};
+const keys = {};
+let frame = 0;
+
+/* Frutas de bonus: emoji, puntos y peso (probabilidad relativa) */
+const FRUITS = [
+  { e:"🍒", pts: 300, w:5 },
+  { e:"🍌", pts: 500, w:4 },
+  { e:"🍎", pts: 800, w:3 },
+  { e:"🍇", pts:1200, w:2 },
+  { e:"🍍", pts:2000, w:1 },
+];
+function randFruit(){
+  const total = FRUITS.reduce((a,f)=>a+f.w, 0);
+  let r = Math.random()*total;
+  for(const f of FRUITS){ r -= f.w; if(r<=0) return f; }
+  return FRUITS[0];
+}
+
+/* ------------------------ Jugadores ------------------------ */
+function makePlayer(idx){
+  return {
+    idx,
+    x: Game.mode===2 ? (idx===0 ? W*0.62 : W*0.38) : W/2,
+    w:30, h:46,
+    vx:0, speed:4.2,
+    lives:3, score:0,
+    inv:0,           // frames de invulnerabilidad
+    alive:true,
+    color: idx===0 ? "#5bc0ff" : "#7dde6a",
+    dark:  idx===0 ? "#1d6ea8" : "#3d8f33",
+    keys: idx===0
+      ? {left:"ArrowLeft", right:"ArrowRight", shoot:["ArrowUp","Enter"]}
+      : {left:"a",         right:"d",          shoot:["w"]},
+    canShoot:true,
+  };
+}
+
+/* ------------------------- Burbujas ------------------------ */
+function makeBall(size, x, y, vx, vy){
+  return { s:size, r:SIZES[size].r, x, y, vx, vy };
+}
+
+function loadLevel(n){
+  const L = LEVELS[n];
+  Game.balls = L.balls.map(b =>
+    makeBall(b.s, b.x*W, 120 + Math.random()*40, 1.5*L.speed*b.d, 0));
+  Game.shots = [];
+  Game.pops = [];
+  Game.fruits = [];
+  Game.texts = [];
+  Game.players.forEach((p,i)=>{
+    p.x = Game.mode===2 ? (i===0 ? W*0.62 : W*0.38) : W/2;
+    p.inv = 90;
+    if(p.lives>0) p.alive = true;
+  });
+  buildSkyline(n);
+}
+
+/* Silueta de edificios distinta por nivel (semilla fija) */
+function buildSkyline(n){
+  let seed = (n+1)*1337;
+  const rnd = ()=> (seed = (seed*16807)%2147483647) / 2147483647;
+  Game.skyline = [];
+  let x = -20;
+  while(x < W+40){
+    const bw = 36 + rnd()*70;
+    const bh = 40 + rnd()*120 + n*4;
+    Game.skyline.push({x, w:bw, h:bh, win:rnd()>0.3});
+    x += bw + 4;
+  }
+}
+
+/* --------------------------- Inicio ------------------------ */
+function startGame(mode){
+  Game.mode = mode;
+  Game.level = 0;
+  Game.players = mode===2 ? [makePlayer(0), makePlayer(1)] : [makePlayer(0)];
+  hide(menu); hide(msg);
+  buildTouch(mode);
+  showLevelIntro();
+}
+
+function showLevelIntro(){
+  Game.state = "between";
+  loadLevel(Game.level);
+  setMsg(
+    `NIVEL ${Game.level+1} / 10`,
+    `📍 ${LEVELS[Game.level].city}`,
+    "¡A JUGAR!",
+    ()=>{ hide(msg); Game.state="play"; }
+  );
+}
+
+/* ------------------------ Bucle juego ----------------------- */
+function update(){
+  if(Game.state!=="play") return;
+  const L = LEVELS[Game.level];
+
+  /* jugadores */
+  for(const p of Game.players){
+    if(!p.alive) continue;
+    p.vx = 0;
+    if(keys[p.keys.left])  p.vx = -p.speed;
+    if(keys[p.keys.right]) p.vx =  p.speed;
+    p.x = Math.max(p.w/2+6, Math.min(W-p.w/2-6, p.x + p.vx));
+
+    const shootDown = p.keys.shoot.some(k=>keys[k]);
+    if(shootDown && p.canShoot && !Game.shots.some(s=>s.owner===p.idx)){
+      Game.shots.push({owner:p.idx, x:p.x, y:FLOOR, tip:FLOOR-10, v:9, color:p.color});
+      p.canShoot = false;
+    }
+    if(!shootDown) p.canShoot = true;
+    if(p.inv>0) p.inv--;
+  }
+
+  /* arpones */
+  for(let i=Game.shots.length-1; i>=0; i--){
+    const s = Game.shots[i];
+    s.tip -= s.v;
+    if(s.tip <= 8){ Game.shots.splice(i,1); }
+  }
+
+  /* burbujas */
+  for(let i=Game.balls.length-1; i>=0; i--){
+    const b = Game.balls[i];
+    b.vy += G;
+    b.x += b.vx * L.speed;
+    b.y += b.vy;
+
+    if(b.x - b.r < 6)   { b.x = 6+b.r;   b.vx =  Math.abs(b.vx); }
+    if(b.x + b.r > W-6) { b.x = W-6-b.r; b.vx = -Math.abs(b.vx); }
+    if(b.y - b.r < 8)   { b.y = 8+b.r;   b.vy =  Math.abs(b.vy); }
+    if(b.y + b.r > FLOOR){
+      b.y = FLOOR - b.r;
+      b.vy = -Math.sqrt(2*G*SIZES[b.s].bounce);
+    }
+
+    /* arpón vs burbuja */
+    let popped = false;
+    for(let j=Game.shots.length-1; j>=0; j--){
+      const s = Game.shots[j];
+      const nearX = Math.abs(b.x - s.x) < b.r + 3;
+      const nearY = b.y + b.r > s.tip && b.y - b.r < FLOOR;
+      if(nearX && nearY){
+        Game.shots.splice(j,1);
+        popBall(i, s.owner);
+        popped = true;
+        break;
+      }
+    }
+    if(popped) continue;
+
+    /* burbuja vs jugador */
+    for(const p of Game.players){
+      if(!p.alive || p.inv>0) continue;
+      const px = Math.max(p.x-p.w/2, Math.min(b.x, p.x+p.w/2));
+      const py = Math.max(FLOOR-p.h, Math.min(b.y, FLOOR));
+      const dx = b.x-px, dy = b.y-py;
+      if(dx*dx + dy*dy < b.r*b.r){
+        hitPlayer(p);
+      }
+    }
+  }
+
+  /* frutas */
+  for(let i=Game.fruits.length-1; i>=0; i--){
+    const f = Game.fruits[i];
+    f.vy += G;
+    f.y += f.vy;
+    if(f.y > FLOOR-14){ f.y = FLOOR-14; f.vy = 0; }
+    f.life--;
+    if(f.life<=0){ Game.fruits.splice(i,1); continue; }
+
+    /* recogida */
+    for(const p of Game.players){
+      if(!p.alive) continue;
+      if(Math.abs(f.x - p.x) < p.w/2 + 16 && f.y > FLOOR - p.h - 18){
+        p.score += f.pts;
+        Game.texts.push({x:f.x, y:f.y-22, t:"+"+f.pts, life:60, color:p.color});
+        Game.fruits.splice(i,1);
+        break;
+      }
+    }
+  }
+
+  /* textos flotantes */
+  for(let i=Game.texts.length-1; i>=0; i--){
+    const t = Game.texts[i];
+    t.y -= 0.7; t.life--;
+    if(t.life<=0) Game.texts.splice(i,1);
+  }
+
+  /* partículas */
+  for(let i=Game.pops.length-1; i>=0; i--){
+    const q = Game.pops[i];
+    q.x += q.vx; q.y += q.vy; q.vy += 0.12; q.life--;
+    if(q.life<=0) Game.pops.splice(i,1);
+  }
+  if(Game.shake>0) Game.shake--;
+
+  /* ¿nivel superado? */
+  if(Game.balls.length===0){
+    Game.level++;
+    if(Game.level >= LEVELS.length){
+      Game.state="win";
+      setMsg("🏆 ¡VICTORIA!", scoreLine()+"<br><br>Has dado la vuelta al mundo reventando burbujas.", "VOLVER AL MENÚ", backToMenu);
+    } else {
+      Game.players.forEach(p=>{ if(p.lives>0) p.score += 500; });
+      showLevelIntro();
+    }
+  }
+}
+
+function popBall(i, owner){
+  const b = Game.balls[i];
+  Game.balls.splice(i,1);
+  const p = Game.players[owner];
+  if(p) p.score += SIZES[b.s].pts;
+
+  /* partículas */
+  for(let k=0;k<10;k++){
+    const a = Math.random()*Math.PI*2;
+    const v = 1+Math.random()*3;
+    Game.pops.push({x:b.x, y:b.y, vx:Math.cos(a)*v, vy:Math.sin(a)*v-1,
+                    life:25+Math.random()*15, hue:SIZES[b.s].hue});
+  }
+  /* a veces (≈1 de cada 4) suelta una fruta de bonus */
+  if(Math.random() < 0.25){
+    const f = randFruit();
+    Game.fruits.push({ e:f.e, pts:f.pts, x:b.x, y:b.y, vy:-1.5, life:420 });
+  }
+  /* dividir */
+  if(b.s > 0){
+    const ns = b.s-1;
+    const kick = -Math.sqrt(2*G*SIZES[ns].bounce)*0.85;
+    const sp = 1.6 + b.s*0.25;
+    Game.balls.push(makeBall(ns, b.x, b.y,  sp, kick));
+    Game.balls.push(makeBall(ns, b.x, b.y, -sp, kick));
+  }
+  Game.shake = 6;
+}
+
+function hitPlayer(p){
+  p.lives--;
+  p.inv = 130;
+  Game.shake = 12;
+  if(p.lives<=0){
+    p.alive = false;
+    if(Game.players.every(q=>!q.alive)){
+      Game.state="over";
+      setMsg("💀 GAME OVER",
+        `Llegaste al nivel ${Game.level+1} · ${LEVELS[Game.level].city}<br>`+scoreLine(),
+        "REINTENTAR", backToMenu);
+    }
+  }
+}
+
+function scoreLine(){
+  return Game.players.map((p,i)=>
+    `<span style="color:${p.color}">J${i+1}: ${p.score} pts</span>`).join(" &nbsp;·&nbsp; ");
+}
+
+function backToMenu(){
+  hide(msg); show(menu); Game.state="menu";
+  touchUI.classList.add("hidden");
+}
+
+/* --------------------------- Dibujo ------------------------ */
+function draw(){
+  const L = LEVELS[Math.min(Game.level, LEVELS.length-1)];
+  cx.save();
+  if(Game.shake>0){
+    cx.translate((Math.random()-.5)*Game.shake, (Math.random()-.5)*Game.shake);
+  }
+
+  /* cielo */
+  const sky = cx.createLinearGradient(0,0,0,FLOOR);
+  sky.addColorStop(0, L.sky[0]);
+  sky.addColorStop(.6, L.sky[1]);
+  sky.addColorStop(1, L.sky[2]);
+  cx.fillStyle = sky;
+  cx.fillRect(0,0,W,H);
+
+  /* sol/luna */
+  cx.beginPath();
+  cx.arc(W*0.78, H*0.22, 38, 0, Math.PI*2);
+  cx.fillStyle = "rgba(255,240,200,.85)";
+  cx.fill();
+
+  /* skyline */
+  cx.fillStyle = "rgba(10,8,20,.55)";
+  for(const b of Game.skyline){
+    cx.fillRect(b.x, FLOOR-b.h, b.w, b.h);
+  }
+  cx.fillStyle = "rgba(255,215,130,.35)";
+  for(const b of Game.skyline){
+    if(!b.win) continue;
+    for(let wx=b.x+6; wx<b.x+b.w-8; wx+=14)
+      for(let wy=FLOOR-b.h+8; wy<FLOOR-12; wy+=18)
+        cx.fillRect(wx, wy, 5, 7);
+  }
+
+  /* suelo */
+  cx.fillStyle = L.ground;
+  cx.fillRect(0, FLOOR, W, H-FLOOR);
+  cx.fillStyle = "rgba(255,255,255,.12)";
+  cx.fillRect(0, FLOOR, W, 3);
+
+  /* arpones (cable ondulado animado) */
+  for(const s of Game.shots){
+    cx.strokeStyle = s.color;
+    cx.lineWidth = 3.5;
+    cx.lineJoin = "round";
+    cx.beginPath();
+    cx.moveTo(s.x, FLOOR);
+    const amp = 6.5;
+    for(let y = FLOOR-6; y > s.tip+14; y -= 5){
+      const off = Math.sin((FLOOR - y) * 0.085 + frame * 0.38) * amp;
+      cx.lineTo(s.x + off, y);
+    }
+    cx.lineTo(s.x, s.tip+10);
+    cx.stroke();
+    /* brillo del cable */
+    cx.strokeStyle = "rgba(255,255,255,.35)";
+    cx.lineWidth = 1.2;
+    cx.stroke();
+    /* punta */
+    cx.fillStyle = "#fff";
+    cx.beginPath();
+    cx.moveTo(s.x, s.tip-6);
+    cx.lineTo(s.x-7, s.tip+10);
+    cx.lineTo(s.x+7, s.tip+10);
+    cx.closePath();
+    cx.fill();
+  }
+
+  /* burbujas */
+  for(const b of Game.balls){
+    const hue = SIZES[b.s].hue;
+    const g = cx.createRadialGradient(b.x-b.r*.35, b.y-b.r*.4, b.r*.1, b.x, b.y, b.r);
+    g.addColorStop(0, `hsl(${hue} 95% 78%)`);
+    g.addColorStop(.55, `hsl(${hue} 85% 55%)`);
+    g.addColorStop(1, `hsl(${hue} 80% 36%)`);
+    cx.fillStyle = g;
+    cx.beginPath();
+    cx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+    cx.fill();
+    cx.strokeStyle = "rgba(0,0,0,.35)";
+    cx.lineWidth = 2.5;
+    cx.stroke();
+    /* brillo */
+    cx.fillStyle = "rgba(255,255,255,.8)";
+    cx.beginPath();
+    cx.ellipse(b.x-b.r*.35, b.y-b.r*.42, b.r*.22, b.r*.13, -0.6, 0, Math.PI*2);
+    cx.fill();
+  }
+
+  /* frutas */
+  for(const f of Game.fruits){
+    /* parpadeo cuando está a punto de desaparecer */
+    if(f.life < 130 && Math.floor(f.life/7)%2===0) continue;
+    const bob = f.vy===0 ? Math.sin(frame*0.1 + f.x)*2 : 0;
+    /* sombra */
+    cx.fillStyle = "rgba(0,0,0,.3)";
+    cx.beginPath();
+    cx.ellipse(f.x, FLOOR-3, 11, 3.5, 0, 0, Math.PI*2);
+    cx.fill();
+    cx.font = "26px serif";
+    cx.textAlign = "center";
+    cx.textBaseline = "middle";
+    cx.fillText(f.e, f.x, f.y + bob);
+  }
+
+  /* textos flotantes de puntos */
+  cx.font = "900 16px 'Courier New', monospace";
+  cx.textAlign = "center";
+  cx.textBaseline = "middle";
+  for(const t of Game.texts){
+    cx.globalAlpha = Math.min(1, t.life/25);
+    cx.fillStyle = "#0008";
+    cx.fillText(t.t, t.x+1.5, t.y+1.5);
+    cx.fillStyle = t.color;
+    cx.fillText(t.t, t.x, t.y);
+  }
+  cx.globalAlpha = 1;
+
+  /* partículas */
+  for(const q of Game.pops){
+    cx.fillStyle = `hsla(${q.hue} 90% 65% / ${q.life/40})`;
+    cx.fillRect(q.x-2, q.y-2, 4, 4);
+  }
+
+  /* jugadores */
+  for(const p of Game.players){
+    if(!p.alive) continue;
+    if(p.inv>0 && Math.floor(p.inv/5)%2===0) continue; // parpadeo
+    drawPlayer(p);
+  }
+
+  cx.restore();
+  drawHUD();
+}
+
+function drawPlayer(p){
+  const x = p.x, base = FLOOR;
+  /* piernas */
+  cx.fillStyle = p.dark;
+  cx.fillRect(x-11, base-16, 8, 16);
+  cx.fillRect(x+3,  base-16, 8, 16);
+  /* cuerpo */
+  cx.fillStyle = p.color;
+  cx.fillRect(x-13, base-36, 26, 22);
+  /* brazos */
+  cx.fillRect(x-18, base-34, 5, 14);
+  cx.fillRect(x+13, base-34, 5, 14);
+  /* cabeza */
+  cx.fillStyle = "#ffd9b3";
+  cx.beginPath();
+  cx.arc(x, base-44, 9, 0, Math.PI*2);
+  cx.fill();
+  /* gorra del color del jugador */
+  cx.fillStyle = p.dark;
+  cx.beginPath();
+  cx.arc(x, base-46, 9, Math.PI, 0);
+  cx.fill();
+  cx.fillRect(x-9, base-47, 22, 3);
+  /* ojos */
+  cx.fillStyle = "#222";
+  cx.fillRect(x-4, base-45, 2.5, 3);
+  cx.fillRect(x+2, base-45, 2.5, 3);
+}
+
+function drawHUD(){
+  cx.save();
+  cx.font = "900 16px 'Courier New', monospace";
+  cx.textBaseline = "top";
+
+  /* nivel y ciudad — centro */
+  cx.textAlign = "center";
+  cx.fillStyle = "rgba(0,0,0,.35)";
+  cx.fillRect(W/2-150, 6, 300, 24);
+  cx.fillStyle = "#ffd166";
+  cx.fillText(`NIVEL ${Game.level+1}  ·  ${LEVELS[Math.min(Game.level,9)].city}`, W/2, 11);
+
+  /* jugadores */
+  Game.players.forEach((p,i)=>{
+    const left = i===0;
+    const x = left ? 14 : W-14;
+    cx.textAlign = left ? "left" : "right";
+    cx.fillStyle = p.color;
+    cx.fillText(`J${i+1}  ${String(p.score).padStart(6,"0")}`, x, 10);
+    const hearts = "♥".repeat(Math.max(0,p.lives)) + "♡".repeat(Math.max(0, 3-p.lives));
+    cx.fillStyle = p.alive ? "#ff5e5b" : "#555";
+    cx.fillText(p.alive ? hearts : "K.O.", x, 30);
+  });
+  cx.restore();
+}
+
+/* ------------------------ UI / overlays --------------------- */
+const menu = document.getElementById("menu");
+const msg  = document.getElementById("msg");
+const msgTitle = document.getElementById("msgTitle");
+const msgBody  = document.getElementById("msgBody");
+const msgBtn   = document.getElementById("msgBtn");
+let msgAction = null;
+
+function setMsg(title, body, btnText, action){
+  msgTitle.innerHTML = title;
+  msgBody.innerHTML = body;
+  msgBtn.textContent = btnText;
+  msgAction = action;
+  show(msg);
+  msgBtn.focus();
+}
+msgBtn.addEventListener("click", ()=>{ if(msgAction) msgAction(); });
+function show(el){ el.classList.remove("hidden"); }
+function hide(el){ el.classList.add("hidden"); }
+
+document.getElementById("btn1p").addEventListener("click", ()=>startGame(1));
+document.getElementById("btn2p").addEventListener("click", ()=>startGame(2));
+
+/* -------------------- Controles táctiles -------------------- */
+const touchUI = document.getElementById("touch");
+const tLeft  = document.getElementById("tLeft");
+const tRight = document.getElementById("tRight");
+const tPause = document.getElementById("tPause");
+let isTouch = matchMedia("(pointer: coarse)").matches || "ontouchstart" in window;
+
+function tbtn(label, key, cls=""){
+  const b = document.createElement("div");
+  b.className = "tbtn " + cls;
+  b.textContent = label;
+  const press   = e=>{ e.preventDefault(); keys[key]=true;  b.classList.add("on"); };
+  const release = e=>{ e.preventDefault(); keys[key]=false; b.classList.remove("on"); };
+  b.addEventListener("pointerdown",  press);
+  b.addEventListener("pointerup",    release);
+  b.addEventListener("pointercancel",release);
+  b.addEventListener("pointerleave", release);
+  b.addEventListener("contextmenu", e=>e.preventDefault());
+  return b;
+}
+
+function buildTouch(mode){
+  tLeft.innerHTML = "";
+  tRight.innerHTML = "";
+  if(mode===1){
+    /* 1 jugador: movimiento a la izquierda, disparo a la derecha */
+    tLeft.append(tbtn("◀","ArrowLeft","p1b"), tbtn("▶","ArrowRight","p1b"));
+    tRight.append(tbtn("⌖","ArrowUp","fire"));
+  } else {
+    /* 2 jugadores: J2 a la izquierda, J1 a la derecha */
+    tLeft.append(tbtn("◀","a","p2b"), tbtn("▶","d","p2b"), tbtn("⌖","w","p2b fire"));
+    tRight.append(tbtn("⌖","ArrowUp","fire"), tbtn("◀","ArrowLeft","p1b"), tbtn("▶","ArrowRight","p1b"));
+  }
+  touchUI.classList.toggle("hidden", !isTouch);
+}
+
+tPause.addEventListener("pointerdown", e=>{ e.preventDefault(); togglePause(); });
+
+/* Si llega un toque en un dispositivo no detectado, mostramos controles */
+window.addEventListener("touchstart", function once(){
+  isTouch = true;
+  if(Game.state!=="menu") touchUI.classList.remove("hidden");
+  window.removeEventListener("touchstart", once);
+}, {passive:true});
+
+function togglePause(){
+  if(Game.state==="play"){
+    Game.state = "pause";
+    setMsg("⏸ PAUSA", scoreLine(), "SEGUIR", ()=>{ hide(msg); Game.state="play"; });
+  } else if(Game.state==="pause"){
+    hide(msg);
+    Game.state = "play";
+  }
+}
+
+/* ------------------------- Teclado -------------------------- */
+window.addEventListener("keydown", e=>{
+  const k = e.key.length===1 ? e.key.toLowerCase() : e.key;
+  keys[k] = true;
+  if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key)) e.preventDefault();
+
+  if((k==="p" || k==="P") && (Game.state==="play" || Game.state==="pause")){
+    togglePause();
+  }
+  /* Enter activa el overlay si está visible */
+  if(k==="Enter" && !msg.classList.contains("hidden") && msgAction){
+    e.preventDefault();
+    const a = msgAction; msgAction = null;
+    for(const key in keys) keys[key] = false;
+    a();
+  }
+});
+window.addEventListener("keyup", e=>{
+  const k = e.key.length===1 ? e.key.toLowerCase() : e.key;
+  keys[k] = false;
+});
+
+/* --------------------------- Loop --------------------------- */
+buildSkyline(0);
+(function loop(){
+  frame++;
+  update();
+  draw();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    🎈 PANG! — LISTO PARA GITHUB 🎈                        ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+📦 ARCHIVOS DESCARGABLES (4 archivos):
+───────────────────────────────────────
+
+1. pang.html (25KB) ⭐ PRINCIPAL
+   → El juego completo en un solo archivo
+   → Abre en navegador para jugar directamente
+
+2. README.md (4KB)
+   → Documentación, características, controles
+   → Cómo jugar, tabla de frutas, tecnología
+
+3. .gitignore (144B)
+   → Archivos a ignorar en Git
+   → Estándar para proyectos
+
+4. SETUP_GITHUB.md
+   → Instrucciones paso a paso para subir a GitHub
+   → Exactamente lo que necesitas
+
+═══════════════════════════════════════════════════════════════════════════
+
+⚡ QUICK START (3 pasos):
+
+1. Descarga estos 4 archivos
+2. Clona tu repo: git clone https://github.com/dierubo/custom-pang.git
+3. Copia los archivos al repo y haz push:
+   
+   git add .
+   git commit -m "Add PANG! arcade game"
+   git push origin main
+
+═══════════════════════════════════════════════════════════════════════════
+
+🎮 PARA JUGAR AHORA:
+   → Abre pang.html en el navegador
+   → Funciona en desktop y móvil
+   → Controles en pantalla o teclado
+
+📋 PARA DETALLES COMPLETOS:
+   → Lee SETUP_GITHUB.md (tiene todo explicado paso a paso)
+
+═══════════════════════════════════════════════════════════════════════════
+
+✨ CARACTERÍSTICAS:
+   ✓ 10 niveles temáticos (vuelta al mundo)
+   ✓ 1-2 jugadores simultáneos
+   ✓ Arpón ondulado animado
+   ✓ Frutas de bonus aleatorias (🍒🍌🍎🍇🍍)
+   ✓ Controles táctiles automáticos en móvil
+   ✓ Física arcade realista
+   ✓ Sin dependencias (puro HTML5+CSS+JS)
+   ✓ 25KB — cabe en cualquier lado
+
+═══════════════════════════════════════════════════════════════════════════
+
+¿Preguntas? 
+→ Lee SETUP_GITHUB.md
+→ O escríbeme y lo ajustamos
+
+¡A jugar! 🎈
