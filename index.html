@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>PANG! · 10 Niveles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#16121f;
@@ -14,12 +17,13 @@
     --p1:#5bc0ff;
     --p2:#7dde6a;
     --paper:#fdf6e3;
+    --px:"Press Start 2P", "Courier New", monospace;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
   body{
     background:radial-gradient(circle at 50% 20%, #2c2240 0%, var(--ink) 70%);
-    font-family:"Courier New", ui-monospace, monospace;
+    font-family:var(--px);
     color:var(--paper);
     display:flex;
     align-items:center;
@@ -39,6 +43,23 @@
   }
   canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 
+  /* ---------- Efecto CRT retro ---------- */
+  #wrap::after{
+    content:"";
+    position:absolute;inset:0;
+    pointer-events:none;
+    z-index:9;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        rgba(0,0,0,0)   0px,
+        rgba(0,0,0,0)   2px,
+        rgba(0,0,0,.18) 3px,
+        rgba(0,0,0,0)   4px
+      ),
+      radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,.35) 100%);
+  }
+
   .overlay{
     position:absolute;inset:0;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -51,15 +72,21 @@
   .hidden{display:none !important}
 
   .title{
-    font-size:clamp(48px, 9vw, 110px);
-    font-weight:900;
-    letter-spacing:.08em;
+    font-size:clamp(34px, 7vw, 84px);
+    letter-spacing:.04em;
     color:var(--coral);
     text-shadow:
       4px 4px 0 var(--gold),
       8px 8px 0 rgba(0,0,0,.45);
     animation:bounceTitle 1.6s ease-in-out infinite;
   }
+  .insert{
+    font-size:clamp(10px,1.4vw,14px);
+    color:var(--gold);
+    letter-spacing:.2em;
+    animation:blink 1s steps(2) infinite;
+  }
+  @keyframes blink{50%{opacity:0}}
   @keyframes bounceTitle{
     0%,100%{transform:translateY(0)}
     50%{transform:translateY(-12px)}
@@ -68,19 +95,18 @@
     .title{animation:none}
   }
   .subtitle{
-    font-size:clamp(12px,1.6vw,18px);
-    letter-spacing:.35em;
+    font-size:clamp(8px,1.2vw,13px);
+    letter-spacing:.25em;
     color:var(--aqua);
     text-transform:uppercase;
   }
   .btn{
-    font-family:inherit;
-    font-size:clamp(16px,2vw,24px);
-    font-weight:900;
-    letter-spacing:.1em;
-    padding:14px 38px;
+    font-family:var(--px);
+    font-size:clamp(11px,1.5vw,17px);
+    letter-spacing:.08em;
+    padding:16px 34px;
     border:3px solid var(--gold);
-    border-radius:8px;
+    border-radius:0;
     background:var(--panel);
     color:var(--paper);
     cursor:pointer;
@@ -94,31 +120,32 @@
 
   .controls{
     display:flex;gap:34px;flex-wrap:wrap;justify-content:center;
-    font-size:clamp(11px,1.4vw,15px);
-    line-height:1.8;
+    font-size:clamp(8px,1vw,11px);
+    line-height:2.1;
   }
   .controls .card{
     border:2px solid rgba(255,255,255,.18);
-    border-radius:8px;
+    border-radius:0;
     padding:12px 20px;
     background:rgba(255,255,255,.04);
     min-width:200px;
   }
-  .controls .card h3{letter-spacing:.2em;margin-bottom:6px;font-size:1.05em}
+  .controls .card h3{letter-spacing:.15em;margin-bottom:6px;font-size:1.05em}
   .p1c{color:var(--p1)} .p2c{color:var(--p2)}
   kbd{
     display:inline-block;
     border:1px solid rgba(255,255,255,.4);
     border-bottom-width:3px;
-    border-radius:4px;
-    padding:0 7px;
+    border-radius:3px;
+    padding:2px 6px;
     background:rgba(255,255,255,.08);
     font-family:inherit;
+    font-size:.9em;
   }
-  .big{font-size:clamp(26px,4vw,52px);font-weight:900;letter-spacing:.12em}
+  .big{font-size:clamp(18px,3vw,38px);letter-spacing:.1em}
   .gold{color:var(--gold)}
   .coral{color:var(--coral)}
-  .small{font-size:clamp(11px,1.3vw,14px);opacity:.75;letter-spacing:.15em}
+  .small{font-size:clamp(8px,1vw,11px);opacity:.75;letter-spacing:.12em;line-height:2}
 
   /* ---------- Controles táctiles ---------- */
   #touch{position:absolute;inset:0;pointer-events:none;z-index:4}
@@ -193,7 +220,8 @@
         Disparar: <kbd>W</kbd>
       </div>
     </div>
-    <div class="small">P = pausa · En móvil salen botones táctiles · Revienta todas las burbujas sin que te toquen</div>
+    <div class="small">P = pausa · En móvil salen botones táctiles<br>🔫 Coge la metralleta para disparar en ráfaga</div>
+    <div class="insert">▶ PULSA 1P O 2P PARA EMPEZAR ◀</div>
   </div>
 
   <!-- INTERMEDIO / PAUSA / FIN -->
@@ -261,7 +289,7 @@ const SIZES = [
 /* ---------------------- Estado global ---------------------- */
 const Game = {
   mode:1, level:0, state:"menu",  // menu | play | pause | between | over | win
-  players:[], balls:[], shots:[], pops:[], fruits:[], texts:[],
+  players:[], balls:[], shots:[], bullets:[], pops:[], fruits:[], texts:[],
   skyline:[], shake:0,
 };
 const keys = {};
@@ -292,6 +320,7 @@ function makePlayer(idx){
     lives:3, score:0,
     inv:0,           // frames de invulnerabilidad
     alive:true,
+    weapon:"harpoon", ammo:0, fireCd:0,
     color: idx===0 ? "#5bc0ff" : "#7dde6a",
     dark:  idx===0 ? "#1d6ea8" : "#3d8f33",
     keys: idx===0
@@ -311,12 +340,14 @@ function loadLevel(n){
   Game.balls = L.balls.map(b =>
     makeBall(b.s, b.x*W, 120 + Math.random()*40, 1.5*L.speed*b.d, 0));
   Game.shots = [];
+  Game.bullets = [];
   Game.pops = [];
   Game.fruits = [];
   Game.texts = [];
   Game.players.forEach((p,i)=>{
     p.x = Game.mode===2 ? (i===0 ? W*0.62 : W*0.38) : W/2;
     p.inv = 90;
+    p.weapon = "harpoon"; p.ammo = 0; p.fireCd = 0;
     if(p.lives>0) p.alive = true;
   });
   buildSkyline(n);
@@ -371,9 +402,24 @@ function update(){
     p.x = Math.max(p.w/2+6, Math.min(W-p.w/2-6, p.x + p.vx));
 
     const shootDown = p.keys.shoot.some(k=>keys[k]);
-    if(shootDown && p.canShoot && !Game.shots.some(s=>s.owner===p.idx)){
-      Game.shots.push({owner:p.idx, x:p.x, y:FLOOR, tip:FLOOR-10, v:9, color:p.color});
-      p.canShoot = false;
+    if(p.fireCd>0) p.fireCd--;
+
+    if(p.weapon==="gun"){
+      /* ráfaga: mantén pulsado para disparar en automático */
+      if(shootDown && p.fireCd<=0 && p.ammo>0){
+        Game.bullets.push({owner:p.idx, x:p.x, y:FLOOR-p.h-4, vy:-11, color:p.color});
+        p.ammo--;
+        p.fireCd = 7;
+        if(p.ammo<=0){
+          p.weapon = "harpoon";
+          Game.texts.push({x:p.x, y:FLOOR-p.h-30, t:"SIN BALAS", life:55, color:"#aaa"});
+        }
+      }
+    } else {
+      if(shootDown && p.canShoot && !Game.shots.some(s=>s.owner===p.idx)){
+        Game.shots.push({owner:p.idx, x:p.x, y:FLOOR, tip:FLOOR-10, v:9, color:p.color});
+        p.canShoot = false;
+      }
     }
     if(!shootDown) p.canShoot = true;
     if(p.inv>0) p.inv--;
@@ -384,6 +430,13 @@ function update(){
     const s = Game.shots[i];
     s.tip -= s.v;
     if(s.tip <= 8){ Game.shots.splice(i,1); }
+  }
+
+  /* balas de ráfaga */
+  for(let i=Game.bullets.length-1; i>=0; i--){
+    const bl = Game.bullets[i];
+    bl.y += bl.vy;
+    if(bl.y < -10){ Game.bullets.splice(i,1); }
   }
 
   /* burbujas */
@@ -416,6 +469,19 @@ function update(){
     }
     if(popped) continue;
 
+    /* bala vs burbuja */
+    for(let j=Game.bullets.length-1; j>=0; j--){
+      const bl = Game.bullets[j];
+      const dx = b.x - bl.x, dy = b.y - bl.y;
+      if(dx*dx + dy*dy < (b.r+4)*(b.r+4)){
+        Game.bullets.splice(j,1);
+        popBall(i, bl.owner);
+        popped = true;
+        break;
+      }
+    }
+    if(popped) continue;
+
     /* burbuja vs jugador */
     for(const p of Game.players){
       if(!p.alive || p.inv>0) continue;
@@ -441,8 +507,15 @@ function update(){
     for(const p of Game.players){
       if(!p.alive) continue;
       if(Math.abs(f.x - p.x) < p.w/2 + 16 && f.y > FLOOR - p.h - 18){
-        p.score += f.pts;
-        Game.texts.push({x:f.x, y:f.y-22, t:"+"+f.pts, life:60, color:p.color});
+        if(f.type==="gun"){
+          p.weapon = "gun";
+          p.ammo = 30;
+          p.fireCd = 0;
+          Game.texts.push({x:f.x, y:f.y-22, t:"¡RÁFAGA!", life:70, color:"#ffd166"});
+        } else {
+          p.score += f.pts;
+          Game.texts.push({x:f.x, y:f.y-22, t:"+"+f.pts, life:60, color:p.color});
+        }
         Game.fruits.splice(i,1);
         break;
       }
@@ -490,10 +563,13 @@ function popBall(i, owner){
     Game.pops.push({x:b.x, y:b.y, vx:Math.cos(a)*v, vy:Math.sin(a)*v-1,
                     life:25+Math.random()*15, hue:SIZES[b.s].hue});
   }
-  /* a veces (≈1 de cada 4) suelta una fruta de bonus */
-  if(Math.random() < 0.25){
+  /* objetos: a veces suelta metralleta (raro) o fruta */
+  const roll = Math.random();
+  if(roll < 0.07){
+    Game.fruits.push({ type:"gun", x:b.x, y:b.y, vy:-1.5, life:420 });
+  } else if(roll < 0.32){
     const f = randFruit();
-    Game.fruits.push({ e:f.e, pts:f.pts, x:b.x, y:b.y, vy:-1.5, life:420 });
+    Game.fruits.push({ type:"fruit", e:f.e, pts:f.pts, x:b.x, y:b.y, vy:-1.5, life:420 });
   }
   /* dividir */
   if(b.s > 0){
@@ -509,6 +585,7 @@ function popBall(i, owner){
 function hitPlayer(p){
   p.lives--;
   p.inv = 130;
+  p.weapon = "harpoon"; p.ammo = 0;   // pierde la metralleta al ser golpeado
   Game.shake = 12;
   if(p.lives<=0){
     p.alive = false;
@@ -532,6 +609,22 @@ function backToMenu(){
 }
 
 /* --------------------------- Dibujo ------------------------ */
+/* mezcla dos colores hex (para las bandas del cielo) */
+function mixHex(a, b, t){
+  const pa = parseInt(a.slice(1),16), pb = parseInt(b.slice(1),16);
+  const r = Math.round(((pa>>16)&255)*(1-t) + ((pb>>16)&255)*t);
+  const g = Math.round(((pa>>8)&255)*(1-t) + ((pb>>8)&255)*t);
+  const bl= Math.round((pa&255)*(1-t) + (pb&255)*t);
+  return `rgb(${r},${g},${bl})`;
+}
+/* círculo dibujado en bloques (pixel-art) */
+function pixelCircle(cxX, cxY, r, px){
+  for(let y=-r; y<r; y+=px){
+    const half = Math.sqrt(Math.max(0, r*r - y*y));
+    cx.fillRect(cxX-half, cxY+y, half*2, px);
+  }
+}
+
 function draw(){
   const L = LEVELS[Math.min(Game.level, LEVELS.length-1)];
   cx.save();
@@ -539,19 +632,21 @@ function draw(){
     cx.translate((Math.random()-.5)*Game.shake, (Math.random()-.5)*Game.shake);
   }
 
-  /* cielo */
-  const sky = cx.createLinearGradient(0,0,0,FLOOR);
-  sky.addColorStop(0, L.sky[0]);
-  sky.addColorStop(.6, L.sky[1]);
-  sky.addColorStop(1, L.sky[2]);
-  cx.fillStyle = sky;
-  cx.fillRect(0,0,W,H);
+  /* cielo en bandas (estilo 8-bit) */
+  const BANDS = 14;
+  for(let i=0; i<BANDS; i++){
+    const t = i/(BANDS-1);
+    const c = t<0.6 ? mixHex(L.sky[0], L.sky[1], t/0.6)
+                    : mixHex(L.sky[1], L.sky[2], (t-0.6)/0.4);
+    cx.fillStyle = c;
+    cx.fillRect(0, (FLOOR/BANDS)*i, W, FLOOR/BANDS+1);
+  }
+  cx.fillStyle = L.sky[2];
+  cx.fillRect(0, FLOOR, W, H-FLOOR);
 
-  /* sol/luna */
-  cx.beginPath();
-  cx.arc(W*0.78, H*0.22, 38, 0, Math.PI*2);
-  cx.fillStyle = "rgba(255,240,200,.85)";
-  cx.fill();
+  /* sol/luna pixelado */
+  cx.fillStyle = "rgba(255,240,200,.9)";
+  pixelCircle(W*0.78, H*0.22, 38, 6);
 
   /* skyline */
   cx.fillStyle = "rgba(10,8,20,.55)";
@@ -600,28 +695,41 @@ function draw(){
     cx.fill();
   }
 
-  /* burbujas */
+  /* burbujas (sombreado plano 8-bit) */
   for(const b of Game.balls){
     const hue = SIZES[b.s].hue;
-    const g = cx.createRadialGradient(b.x-b.r*.35, b.y-b.r*.4, b.r*.1, b.x, b.y, b.r);
-    g.addColorStop(0, `hsl(${hue} 95% 78%)`);
-    g.addColorStop(.55, `hsl(${hue} 85% 55%)`);
-    g.addColorStop(1, `hsl(${hue} 80% 36%)`);
-    cx.fillStyle = g;
-    cx.beginPath();
-    cx.arc(b.x, b.y, b.r, 0, Math.PI*2);
-    cx.fill();
-    cx.strokeStyle = "rgba(0,0,0,.35)";
+    /* base */
+    cx.fillStyle = `hsl(${hue} 80% 38%)`;
+    cx.beginPath(); cx.arc(b.x, b.y, b.r, 0, Math.PI*2); cx.fill();
+    /* tono medio */
+    cx.fillStyle = `hsl(${hue} 85% 55%)`;
+    cx.beginPath(); cx.arc(b.x - b.r*.12, b.y - b.r*.12, b.r*.82, 0, Math.PI*2); cx.fill();
+    /* luz */
+    cx.fillStyle = `hsl(${hue} 95% 72%)`;
+    cx.beginPath(); cx.arc(b.x - b.r*.25, b.y - b.r*.28, b.r*.5, 0, Math.PI*2); cx.fill();
+    /* brillo cuadrado pixel */
+    cx.fillStyle = "rgba(255,255,255,.9)";
+    const hl = Math.max(3, b.r*.22);
+    cx.fillRect(b.x - b.r*.45, b.y - b.r*.55, hl, hl);
+    cx.fillRect(b.x - b.r*.45 + hl*1.4, b.y - b.r*.55 + hl*1.4, hl*.55, hl*.55);
+    /* contorno */
+    cx.strokeStyle = "rgba(0,0,0,.4)";
     cx.lineWidth = 2.5;
-    cx.stroke();
-    /* brillo */
-    cx.fillStyle = "rgba(255,255,255,.8)";
-    cx.beginPath();
-    cx.ellipse(b.x-b.r*.35, b.y-b.r*.42, b.r*.22, b.r*.13, -0.6, 0, Math.PI*2);
-    cx.fill();
+    cx.beginPath(); cx.arc(b.x, b.y, b.r, 0, Math.PI*2); cx.stroke();
   }
 
-  /* frutas */
+  /* balas de ráfaga */
+  for(const bl of Game.bullets){
+    cx.fillStyle = "#fff";
+    cx.fillRect(bl.x-2, bl.y-7, 4, 10);
+    cx.fillStyle = bl.color;
+    cx.fillRect(bl.x-2, bl.y+1, 4, 4);
+    /* estela */
+    cx.fillStyle = "rgba(255,209,102,.4)";
+    cx.fillRect(bl.x-1.5, bl.y+6, 3, 7);
+  }
+
+  /* objetos: frutas y metralleta */
   for(const f of Game.fruits){
     /* parpadeo cuando está a punto de desaparecer */
     if(f.life < 130 && Math.floor(f.life/7)%2===0) continue;
@@ -629,16 +737,21 @@ function draw(){
     /* sombra */
     cx.fillStyle = "rgba(0,0,0,.3)";
     cx.beginPath();
-    cx.ellipse(f.x, FLOOR-3, 11, 3.5, 0, 0, Math.PI*2);
+    cx.ellipse(f.x, FLOOR-3, 12, 3.5, 0, 0, Math.PI*2);
     cx.fill();
-    cx.font = "26px serif";
-    cx.textAlign = "center";
-    cx.textBaseline = "middle";
-    cx.fillText(f.e, f.x, f.y + bob);
+
+    if(f.type==="gun"){
+      drawGunItem(f.x, f.y + bob);
+    } else {
+      cx.font = "26px serif";
+      cx.textAlign = "center";
+      cx.textBaseline = "middle";
+      cx.fillText(f.e, f.x, f.y + bob);
+    }
   }
 
   /* textos flotantes de puntos */
-  cx.font = "900 16px 'Courier New', monospace";
+  cx.font = "11px 'Press Start 2P', monospace";
   cx.textAlign = "center";
   cx.textBaseline = "middle";
   for(const t of Game.texts){
@@ -665,6 +778,36 @@ function draw(){
 
   cx.restore();
   drawHUD();
+}
+
+/* sprite pixel-art de la metralleta con halo */
+function drawGunItem(x, y){
+  /* halo parpadeante */
+  if(Math.floor(frame/8)%2===0){
+    cx.strokeStyle = "rgba(255,209,102,.8)";
+    cx.lineWidth = 2;
+    cx.strokeRect(x-17, y-12, 34, 24);
+  }
+  /* cañón */
+  cx.fillStyle = "#9aa3ad";
+  cx.fillRect(x-2, y-7, 16, 5);
+  cx.fillStyle = "#c7ced6";
+  cx.fillRect(x-2, y-7, 16, 2);
+  /* cuerpo */
+  cx.fillStyle = "#4a4f57";
+  cx.fillRect(x-14, y-5, 16, 8);
+  /* cargador */
+  cx.fillStyle = "#2e3238";
+  cx.fillRect(x-7, y+3, 6, 8);
+  /* culata */
+  cx.fillStyle = "#7a4a2b";
+  cx.fillRect(x-14, y-3, 5, 5);
+  /* gatillo */
+  cx.fillStyle = "#2e3238";
+  cx.fillRect(x-1, y+3, 3, 4);
+  /* destello en el cañón */
+  cx.fillStyle = "#ffd166";
+  cx.fillRect(x+12, y-7, 3, 2);
 }
 
 function drawPlayer(p){
@@ -694,19 +837,33 @@ function drawPlayer(p){
   cx.fillStyle = "#222";
   cx.fillRect(x-4, base-45, 2.5, 3);
   cx.fillRect(x+2, base-45, 2.5, 3);
+  /* metralleta en mano cuando está activa */
+  if(p.weapon==="gun"){
+    cx.fillStyle = "#4a4f57";
+    cx.fillRect(x-4, base-40, 8, 14);
+    cx.fillStyle = "#9aa3ad";
+    cx.fillRect(x-2, base-50, 4, 12);
+    /* fogonazo al disparar */
+    if(p.fireCd>4){
+      cx.fillStyle = "#ffd166";
+      cx.fillRect(x-4, base-58, 8, 7);
+      cx.fillStyle = "#fff";
+      cx.fillRect(x-2, base-56, 4, 4);
+    }
+  }
 }
 
 function drawHUD(){
   cx.save();
-  cx.font = "900 16px 'Courier New', monospace";
+  cx.font = "10px 'Press Start 2P', monospace";
   cx.textBaseline = "top";
 
   /* nivel y ciudad — centro */
   cx.textAlign = "center";
-  cx.fillStyle = "rgba(0,0,0,.35)";
-  cx.fillRect(W/2-150, 6, 300, 24);
+  cx.fillStyle = "rgba(0,0,0,.45)";
+  cx.fillRect(W/2-160, 6, 320, 22);
   cx.fillStyle = "#ffd166";
-  cx.fillText(`NIVEL ${Game.level+1}  ·  ${LEVELS[Math.min(Game.level,9)].city}`, W/2, 11);
+  cx.fillText(`NIVEL ${Game.level+1} · ${LEVELS[Math.min(Game.level,9)].city}`, W/2, 13);
 
   /* jugadores */
   Game.players.forEach((p,i)=>{
@@ -714,10 +871,15 @@ function drawHUD(){
     const x = left ? 14 : W-14;
     cx.textAlign = left ? "left" : "right";
     cx.fillStyle = p.color;
-    cx.fillText(`J${i+1}  ${String(p.score).padStart(6,"0")}`, x, 10);
+    cx.fillText(`J${i+1} ${String(p.score).padStart(6,"0")}`, x, 10);
     const hearts = "♥".repeat(Math.max(0,p.lives)) + "♡".repeat(Math.max(0, 3-p.lives));
     cx.fillStyle = p.alive ? "#ff5e5b" : "#555";
-    cx.fillText(p.alive ? hearts : "K.O.", x, 30);
+    cx.fillText(p.alive ? hearts : "K.O.", x, 28);
+    /* munición de la ráfaga */
+    if(p.alive && p.weapon==="gun"){
+      cx.fillStyle = "#ffd166";
+      cx.fillText(`🔫×${p.ammo}`, x, 46);
+    }
   });
   cx.restore();
 }
