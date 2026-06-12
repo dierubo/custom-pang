@@ -2,7 +2,12 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#241c33">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PANG!">
+<link rel="manifest" href="manifest.json">
 <title>PANG! · 10 Niveles</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,8 +33,9 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    min-height:100vh;
+    min-height:100dvh;
     overflow:hidden;
+    padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);
   }
   #wrap{
     position:relative;
@@ -367,8 +373,20 @@ function buildSkyline(n){
   }
 }
 
+/* -------- Pantalla completa en móvil -------- */
+function enterFullscreen(){
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
+  if(req) req.call(el).catch(()=>{});
+  if(/iPhone|iPad|iPod/.test(navigator.userAgent)){
+    window.scrollTo(0,1);
+    setTimeout(()=>window.scrollTo(0,0),100);
+  }
+}
+
 /* --------------------------- Inicio ------------------------ */
 function startGame(mode){
+  enterFullscreen();
   Game.mode = mode;
   Game.level = 0;
   Game.players = mode===2 ? [makePlayer(0), makePlayer(1)] : [makePlayer(0)];
