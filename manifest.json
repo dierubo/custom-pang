@@ -1,0 +1,9 @@
+{
+  "name": "PANG! · 10 Niveles",
+  "short_name": "PANG!",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#16121f",
+  "theme_color": "#241c33"
+}
